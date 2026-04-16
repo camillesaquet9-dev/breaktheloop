@@ -1,135 +1,241 @@
+/* =============================================================================
+ * breaktheloop.site — design system
+ * Brutalist editorial. Ivory / black / blood-red accent. Typographic hierarchy.
+ * Tailwind v4 CSS-first tokens, self-hosted fonts, dark via [data-theme="dark"].
+ * ============================================================================= */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* Self-hosted fonts (Fontsource). Latin + latin-ext via unicode-range on each
+ * @font-face — browsers only download the subsets the page actually uses. */
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
+@import "@fontsource/instrument-serif/latin.css";
+@import "@fontsource/instrument-serif/latin-ext.css";
+@import "@fontsource/instrument-serif/latin-italic.css";
+@import "@fontsource/instrument-serif/latin-ext-italic.css";
 
-/* Step 2 will override with the real design system. This is a placeholder. */
+/* Dark mode = [data-theme="dark"] attribute on <html>. Toggle user-controlled
+ * (layout.tsx runs a pre-hydration script to read localStorage / prefers). */
+@custom-variant dark (&:is([data-theme="dark"] *));
 
+/* ========== Design tokens ==================================================
+ * Literal palette + fonts + spacing. Expose to Tailwind via @theme. */
+@theme {
+  /* Brand palette — rare accent, high contrast, ivory base */
+  --color-bg: #fafaf7;
+  --color-fg: #0a0a0a;
+  --color-accent: #8b1a1a;
+  --color-muted: #6b6b66;
+  --color-border: #e5e5e0;
+
+  /* Fonts */
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "Inter Variable", system-ui, -apple-system, sans-serif;
+
+  /* Spacing — 24px gutter for the 12-col grid */
+  --spacing-gutter: 1.5rem;
+
+  /* Radius — brutalist: near-flat */
+  --radius-none: 0;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+/* ========== shadcn semantic tokens ========================================
+ * Mapped to brand palette. Keeping the full shadcn token surface so any
+ * shadcn/ui component we drop in later just works. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-popover-foreground: var(--popover-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-card-foreground: var(--card-foreground);
+
+  --radius-xs: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
 }
 
-body {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-
+/* ========== Light (default) ============================================== */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+
+  --background: #fafaf7;
+  --foreground: #0a0a0a;
+
+  --primary: #0a0a0a;
+  --primary-foreground: #fafaf7;
+
+  --secondary: #f1f1ec;
+  --secondary-foreground: #0a0a0a;
+
+  --muted: #f1f1ec;
+  --muted-foreground: #6b6b66;
+
+  --accent: #8b1a1a;
+  --accent-foreground: #fafaf7;
+
+  --destructive: #8b1a1a;
+  --destructive-foreground: #fafaf7;
+
+  --border: #e5e5e0;
+  --input: #e5e5e0;
+  --ring: #0a0a0a;
+
+  --popover: #fafaf7;
+  --popover-foreground: #0a0a0a;
+
+  --card: #fafaf7;
+  --card-foreground: #0a0a0a;
+
+  --radius: 2px;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* ========== Dark (data-theme="dark") ===================================== */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #0a0a0a;
+  --foreground: #fafaf7;
+
+  --primary: #fafaf7;
+  --primary-foreground: #0a0a0a;
+
+  --secondary: #1a1a17;
+  --secondary-foreground: #fafaf7;
+
+  --muted: #1a1a17;
+  --muted-foreground: #9b9b96;
+
+  --accent: #b83030;
+  --accent-foreground: #fafaf7;
+
+  --destructive: #b83030;
+  --destructive-foreground: #fafaf7;
+
+  --border: #2a2a27;
+  --input: #2a2a27;
+  --ring: #fafaf7;
+
+  --popover: #111110;
+  --popover-foreground: #fafaf7;
+
+  --card: #111110;
+  --card-foreground: #fafaf7;
 }
 
+/* ========== Base layer =================================================== */
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+
   html {
-    @apply font-sans;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Typographic scale — purely semantic, no utility class needed */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
+  }
+}
+
+/* ========== Utility helpers ============================================== */
+.font-display {
+  font-family: var(--font-display);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Skip-to-content link — visually hidden until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  padding: 0.5rem 1rem;
+  background: var(--foreground);
+  color: var(--background);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 0;
+}
+
+/* ========== Reduced motion ===============================================
+ * !important is intentional — we need to override third-party library motion
+ * (Framer, GSAP, Three.js) regardless of specificity. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    scroll-behavior: auto !important;
   }
 }
