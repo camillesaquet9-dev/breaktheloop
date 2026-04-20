@@ -38,8 +38,14 @@ export const contactSchema = z.object({
   /** Cloudflare Turnstile token returned by the widget. Optional only in
    *  tests + dev: the server-side validator enforces presence in prod. */
   turnstileToken: z.string().optional(),
-  /** Honeypot — hidden field; real users never fill it. */
-  honeypot: z.string().max(0).optional(),
+  /**
+   * Honeypot — hidden field; real users never fill it. We intentionally DO
+   * NOT reject a filled honeypot at the schema level: the handler has its
+   * own branch that returns `reason: "honeypot"`, which the route adapter
+   * maps to HTTP 200 (silent success) so bots stop retrying. Capping max()
+   * here would turn the bot hit into a 400 and defeat the ruse.
+   */
+  honeypot: z.string().max(5000).optional(),
 });
 
 export type ContactPayload = z.infer<typeof contactSchema>;
