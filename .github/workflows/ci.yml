@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel stale runs on the same branch when new pushes land.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      # Fake values sufficient to pass the build's env-presence guards.
+      # The API route is force-dynamic and never executes during `next build`,
+      # so these don't need to be real credentials.
+      NEXT_PUBLIC_SITE_URL: https://breaktheloop.site
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      SECRET_IP_SALT: ci-salt-0000000000000000000000000000000
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+      RESEND_API_KEY: re_ci_placeholder
+      CONTACT_TO_EMAIL: ci@breaktheloop.site
+      CONTACT_FROM_EMAIL: noreply@breaktheloop.site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint (biome)
+        run: pnpm lint
+
+      - name: Typecheck (tsc --noEmit)
+        run: pnpm typecheck
+
+      - name: Unit tests (vitest)
+        run: pnpm test
+
+      - name: Build (next build)
+        run: pnpm build
+
+  e2e:
+    name: playwright smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: verify
+
+    env:
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-placeholder
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-role-placeholder
+      SECRET_IP_SALT: ci-salt-0000000000000000000000000000000
+      TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+      RESEND_API_KEY: re_ci_placeholder
+      CONTACT_TO_EMAIL: ci@breaktheloop.site
+      CONTACT_FROM_EMAIL: noreply@breaktheloop.site
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
