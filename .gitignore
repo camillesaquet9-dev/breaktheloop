@@ -52,3 +52,6 @@ next-env.d.ts
 # supabase local
 /supabase/.branches
 /supabase/.temp
+
+# local workspace config (Claude Code launch.json, etc.)
+/.claude

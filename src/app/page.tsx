@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroRoom } from "@/components/hero-room/HeroRoom";
 import { KillChain } from "@/components/kill-chain/KillChain";
 import { ProjectCard } from "@/components/site/ProjectCard";
 import { buttonVariants } from "@/components/ui/button";
@@ -6,11 +7,14 @@ import { getFeaturedProjects } from "@/lib/projects";
 
 /**
  * Landing page — sections:
- *   01 Hero (name + pitch + Kill Chain 3D)
- *   02 Selected work (3 featured projects)
- *   03 Contact CTA
+ *   01 Hero (interactive 3D hacker-room + name takeover)
+ *   02 Méthodologie — Cyber Kill Chain
+ *   03 Selected work (3 featured projects)
+ *   04 Contact CTA
  *
- * Server component; interactivity is confined to <KillChain/>.
+ * Server component; interactivity is confined to <HeroRoom/> and <KillChain/>.
+ * HeroRoom self-decides whether to mount its R3F canvas or fall back to the
+ * SSR typographic hero — no capability checks needed at this layer.
  */
 export default async function Home() {
   const featured = await getFeaturedProjects();
@@ -18,66 +22,9 @@ export default async function Home() {
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
       {/* ============================================================
-          01 — HERO
+          01 — HERO (interactive 3D room / typographic fallback)
          ============================================================ */}
-      <section
-        aria-labelledby="hero-title"
-        className="mx-auto w-full max-w-6xl px-6 pt-16 pb-24 md:pt-24"
-      >
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          01 — Hero
-        </p>
-
-        <h1
-          id="hero-title"
-          className="mt-6 font-display text-5xl leading-[0.95] md:text-7xl lg:text-8xl"
-        >
-          Break the loop.<span className="text-accent">_</span>
-        </h1>
-
-        <div className="mt-10 grid gap-10 md:grid-cols-[2fr_1fr] md:gap-16">
-          <div className="space-y-6">
-            <p className="max-w-xl text-base leading-relaxed md:text-lg">
-              Camille Saquet — étudiant 3<sup>e</sup> année BUT R&amp;T cybersécurité à Lannion,
-              admis en alternance ESNA Ingénieur Cyberdéfense. Profil offense-forward :{" "}
-              <strong className="font-semibold">pentest</strong>,{" "}
-              <strong className="font-semibold">red team</strong>,{" "}
-              <strong className="font-semibold">audit</strong>. Certifié CSNA Stormshield, top
-              mondial HackAPrompt.
-            </p>
-            <p className="font-mono text-sm text-muted-foreground">
-              <span className="text-foreground">$</span> whoami → camille · alternance 3 ans
-              cherchée · rentrée septembre 2026
-            </p>
-            <div className="flex flex-wrap gap-3 pt-2">
-              <Link href="/projects" className={buttonVariants()}>
-                Voir les projets
-              </Link>
-              <Link href="/contact" className={buttonVariants({ variant: "outline" })}>
-                Me contacter
-              </Link>
-            </div>
-          </div>
-
-          <div className="space-y-2 border-l border-border pl-6 font-mono text-xs uppercase tracking-[0.15em] text-muted-foreground md:pl-8">
-            <p>
-              <span className="text-foreground">Location</span> — Lannion, FR
-            </p>
-            <p>
-              <span className="text-foreground">Status</span> — étudiant 3e année
-            </p>
-            <p>
-              <span className="text-foreground">Cert.</span> — CSNA Stormshield
-            </p>
-            <p>
-              <span className="text-foreground">Rank</span> — top mondial HackAPrompt
-            </p>
-            <p>
-              <span className="text-foreground">Open to</span> — alternance 09/2026
-            </p>
-          </div>
-        </div>
-      </section>
+      <HeroRoom />
 
       {/* ============================================================
           02 — KILL CHAIN

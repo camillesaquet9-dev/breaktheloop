@@ -50,13 +50,18 @@ function buildContentSecurityPolicy({ nonce, isDev }: SecurityHeaderContext): st
   const scriptSrcExtras = isDev ? "'unsafe-eval'" : "";
   const connectSrcExtras = isDev ? "ws: wss:" : "";
 
+  // 'wasm-unsafe-eval' is required by browsers to instantiate the Draco WASM
+  // decoder used by three.js to decompress the hero 3D scene geometry.
+  // It ONLY permits WebAssembly.instantiate — does NOT re-enable JS eval.
+  const wasmEval = "'wasm-unsafe-eval'";
+
   const directives: Record<string, string> = {
     "default-src": "'self'",
     "base-uri": "'self'",
     "object-src": "'none'",
     "frame-ancestors": "'none'",
     "form-action": "'self'",
-    "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic' ${scriptSrcExtras}`.trim(),
+    "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic' ${wasmEval} ${scriptSrcExtras}`.trim(),
     // Fontsource fonts are self-hosted, so font-src stays 'self'.
     "font-src": "'self' data:",
     // Tailwind injects <style> tags; we allow nonce + 'unsafe-inline' ONLY
