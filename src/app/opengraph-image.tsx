@@ -9,7 +9,7 @@ import { ImageResponse } from "next/og";
  */
 
 export const runtime = "edge";
-export const alt = "Camille Saquet — breaktheloop.site — portfolio cybersécurité";
+export const alt = "Camille Saquet — portfolio cybersécurité · red team · pentest";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -38,17 +38,27 @@ export default function OpenGraphImage() {
             color: "#6B6B66",
           }}
         >
-          — breaktheloop.site
+          — portfolio · cybersécurité
         </div>
         <div
           style={{
-            fontSize: 128,
-            lineHeight: 0.95,
+            fontSize: 160,
+            lineHeight: 0.9,
             fontWeight: 400,
-            letterSpacing: -2,
+            letterSpacing: -4,
           }}
         >
-          Camille Saquet
+          Camille
+        </div>
+        <div
+          style={{
+            fontSize: 160,
+            lineHeight: 0.9,
+            fontWeight: 400,
+            letterSpacing: -4,
+          }}
+        >
+          Saquet
         </div>
       </div>
 

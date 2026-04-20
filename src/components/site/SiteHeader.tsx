@@ -37,13 +37,19 @@ export function SiteHeader() {
       }}
     >
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-6 px-6">
-        {/* Logo — pure typographic, JetBrains Mono */}
+        {/* Logo — Camille Saquet wordmark + discreet codename */}
         <Link
           href="/"
-          className="font-mono text-sm tracking-tight text-foreground transition-opacity hover:opacity-70 focus-visible:opacity-70"
-          aria-label="breaktheloop — home"
+          className="group flex items-baseline gap-2 text-foreground transition-opacity hover:opacity-70 focus-visible:opacity-70"
+          aria-label="Camille Saquet — home"
         >
-          breaktheloop
+          <span className="font-display text-lg leading-none tracking-tight">Camille Saquet</span>
+          <span
+            className="hidden font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:inline"
+            aria-hidden
+          >
+            / breaktheloop
+          </span>
         </Link>
 
         {/* Desktop nav */}
