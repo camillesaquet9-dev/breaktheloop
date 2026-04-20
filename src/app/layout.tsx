@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SkipLink } from "@/components/site/SkipLink";
@@ -57,14 +58,22 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // The middleware sets `x-nonce` on every request; read it here so we can
+  // emit inline <script nonce="..."> tags compatible with our CSP. When the
+  // middleware is bypassed (e.g. `next start` with matcher mismatch), the
+  // nonce is undefined and the script simply runs without one — which is
+  // fine in production because no CSP is attached to that response either.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     <html lang="fr" suppressHydrationWarning className="h-full">
       <head>
         {/* Runs synchronously before first paint to set [data-theme]. Inline —
-            NOT <Script> — so it executes before hydration and prevents FOUC. */}
+            NOT <Script> — so it executes before hydration and prevents FOUC.
+            The nonce matches the per-request CSP value set in middleware.ts. */}
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static trusted string from our own module */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased">
         <SkipLink />
