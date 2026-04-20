@@ -140,6 +140,10 @@ tests/
 
 ---
 
+## Crédits tiers
+
+- **Hacker Room low poly** par [Pudding_King](https://sketchfab.com/Pudding_King) ([Sketchfab](https://sketchfab.com/3d-models/hacker-room-low-poly-2d86dd3e18a44cc080f85a0e1af9ffe9)) — [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). Fichier adapté : conversion `KHR_materials_pbrSpecularGlossiness` → metal-rough, textures WebP, compression géométrie Draco.
+
 ## Licence
 
 © Camille Saquet. Le code du site est personnel ; les projets référencés peuvent être sous NDA (marqués `[REDACTED — NDA]` sur leur page).

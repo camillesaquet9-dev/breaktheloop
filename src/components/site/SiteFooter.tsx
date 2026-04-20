@@ -86,11 +86,37 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t pt-6 font-mono text-xs text-muted-foreground">
-          <span>© {year} Camille Saquet — breaktheloop.site</span>
-          <span>
-            build <code className="text-foreground">{COMMIT_SHA || "dev"}</code>
-          </span>
+        <div className="mt-12 space-y-3 border-t pt-6 font-mono text-xs text-muted-foreground">
+          <p>
+            3D hero scene — &quot;Hacker Room low poly&quot; by{" "}
+            <a
+              href="https://sketchfab.com/Pudding_King"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground/80 underline underline-offset-2 hover:text-foreground"
+            >
+              Pudding_King
+            </a>{" "}
+            ·{" "}
+            <a
+              href="https://creativecommons.org/licenses/by/4.0/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground/80 underline underline-offset-2 hover:text-foreground"
+            >
+              CC-BY 4.0
+            </a>{" "}
+            · adapted (textures WebP · Draco)
+          </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              © {year} Camille Saquet{" "}
+              <span className="text-muted-foreground/60">· [site://breaktheloop]</span>
+            </span>
+            <span>
+              build <code className="text-foreground">{COMMIT_SHA || "dev"}</code>
+            </span>
+          </div>
         </div>
       </div>
     </footer>
