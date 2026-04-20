@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { labelForCategory, type Project } from "@/lib/projects";
+import { labelForCategory, type ProjectMeta } from "@/lib/projects";
 
 /**
  * Landing/projects list card. Brutalist editorial — no images, pure
@@ -7,7 +7,7 @@ import { labelForCategory, type Project } from "@/lib/projects";
  * on the arrow glyph. No drop shadows, no rounded corners beyond the
  * global 2px.
  */
-export function ProjectCard({ project }: { readonly project: Project }) {
+export function ProjectCard({ project }: { readonly project: ProjectMeta }) {
   return (
     <Link
       href={`/projects/${project.slug}`}

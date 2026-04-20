@@ -12,8 +12,8 @@ import { getFeaturedProjects } from "@/lib/projects";
  *
  * Server component; interactivity is confined to <KillChain/>.
  */
-export default function Home() {
-  const featured = getFeaturedProjects();
+export default async function Home() {
+  const featured = await getFeaturedProjects();
 
   return (
     <main id="main-content" tabIndex={-1} className="flex-1">
