@@ -222,6 +222,21 @@
   left: 0;
 }
 
+/* Caret blink — used by the intro typewriter */
+@keyframes blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.animate-blink {
+  animation: blink 1s steps(1) infinite;
+}
+
 /* ========== Reduced motion ===============================================
  * !important is intentional — we need to override third-party library motion
  * (Framer, GSAP, Three.js) regardless of specificity. */
