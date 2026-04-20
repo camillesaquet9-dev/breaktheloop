@@ -1,0 +1,2 @@
+-- Seed file intentionally left empty.
+-- The only table (contact_messages) receives data from real submissions.
