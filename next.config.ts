@@ -7,14 +7,15 @@ const commitSha = process.env.VERCEL_GIT_COMMIT_SHA ?? process.env.NEXT_PUBLIC_C
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Self-contained build for Docker: copies node_modules + .next/standalone.
+  // Image size ~150 MB instead of ~1.2 GB with full pnpm cache.
+  output: "standalone",
   turbopack: {
     root: __dirname,
   },
   env: {
     NEXT_PUBLIC_COMMIT_SHA: commitSha,
   },
-  // Security headers are also set in middleware.ts (step 4). Duplicate here for
-  // routes not touched by the middleware (e.g. static assets).
   async headers() {
     return [];
   },

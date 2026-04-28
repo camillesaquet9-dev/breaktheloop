@@ -1,0 +1,48 @@
+# BREAK THE LOOP — runs Next.js behind Caddy (platform reverse-proxy).
+# Caddy routes  https://breaktheloop.fr  ->  btl-app:3000  via proxy-net.
+#
+# Deploy on the VPS:
+#   cd /srv/apps/breaktheloop
+#   git pull
+#   cp .env.example .env.production && vim .env.production    # first time only
+#   docker compose build
+#   docker compose up -d
+#   # then add the Caddy block (see deploy/caddy-snippet.txt) + reload caddy
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Inlined into the client bundle at build time — read from .env.production
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    image: breaktheloop:latest
+    container_name: btl-app
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    expose:
+      - "3000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - proxy-net
+
+networks:
+  proxy-net:
+    external: true
+    name: proxy-net

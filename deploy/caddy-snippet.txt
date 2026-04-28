@@ -1,0 +1,20 @@
+# Append this block to /srv/platform/Caddyfile, then reload Caddy:
+#
+#   docker compose -f /srv/platform/docker-compose.yml exec caddy \
+#     caddy reload --config /etc/caddy/Caddyfile
+
+# ═══════════════════════════════════════════════════════════════════
+# APP : BREAK THE LOOP — arène red team IA
+# ═══════════════════════════════════════════════════════════════════
+breaktheloop.fr, www.breaktheloop.fr {
+	import security_headers
+	import common_logs breaktheloop
+
+	encode zstd gzip
+	reverse_proxy btl-app:3000 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up Host {host}
+	}
+}

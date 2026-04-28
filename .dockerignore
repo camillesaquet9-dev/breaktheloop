@@ -1,0 +1,15 @@
+.git
+.github
+.next
+node_modules
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+tests/e2e
+playwright-report
+test-results
+docs
+deploy
+README.md
