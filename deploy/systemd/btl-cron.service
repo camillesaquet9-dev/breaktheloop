@@ -1,0 +1,16 @@
+# /etc/systemd/system/btl-cron.service
+# Generic cron-bus: hits the right endpoint based on $TARGET.
+[Unit]
+Description=BREAK THE LOOP cron hit (%i)
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/btl/cron.env
+ExecStart=/usr/bin/curl -fsS --max-time 30 -X POST \
+  -H "authorization: Bearer ${CRON_SECRET}" \
+  https://breaktheloop.fr/api/cron/%i
+
+# Quiet logging unless something fails.
+StandardOutput=null
+StandardError=journal

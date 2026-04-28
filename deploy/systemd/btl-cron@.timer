@@ -1,0 +1,14 @@
+# /etc/systemd/system/btl-cron@.timer
+# Generic timer template, instanciated per endpoint name (e.g. refresh-leaderboard).
+[Unit]
+Description=BREAK THE LOOP cron timer (%i)
+
+[Timer]
+# Default: every 5 minutes; overridden per-instance via drop-in (see below).
+OnCalendar=*:0/5
+AccuracySec=15s
+Persistent=true
+Unit=btl-cron@%i.service
+
+[Install]
+WantedBy=timers.target

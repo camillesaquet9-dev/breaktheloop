@@ -1,113 +1,27 @@
-# breaktheloop.site
+# BREAK THE LOOP
 
-Portfolio cybersécurité — **Camille Saquet**. Étudiant BUT R&T option cybersécurité à Lannion, admis à l'ESNA (Ingénieur Cyberdéfense). À la recherche d'une alternance 3 ans rentrée septembre 2026 : red team / pentest / SOC N2–N3.
+Arène red team IA orientée cybersécurité. Inspirée de Gandalf (Lakera) et HackAPrompt, mais ciblée cyber : SOC, pentest, IDS, malware analysis.
 
-> Direction design : **brutalist editorial**. Pas de glassmorphism, pas de blur, pas de particules. Ivoire `#FAFAF7` / noir `#0A0A0A` / rouge sang `#8B1A1A`. Typographies : Instrument Serif + JetBrains Mono + Inter.
+> **Probe · Exploit · Comprendre.**
+> Tu n'es pas l'utilisateur. Tu es l'adversaire.
+
+Site : <https://breaktheloop.fr>
 
 ---
 
 ## Stack
 
-| Couche           | Choix                                                                |
-| ---------------- | -------------------------------------------------------------------- |
-| Framework        | Next.js 16 (App Router, Turbopack), React 19, TypeScript strict      |
-| Styling          | Tailwind v4 (CSS-first, `@theme`), shadcn `base-nova` + `@base-ui/react` |
-| 3D               | React Three Fiber + drei (Kill Chain scene, lazy-mounted)            |
-| Formulaires      | React Hook Form + Zod (validation partagée client/serveur)           |
-| Persistance      | Supabase Postgres — RLS forcée, service_role côté serveur uniquement |
-| Rate limit       | Upstash Redis — sliding window 3/h/IP (fallback mémoire en dev)      |
-| Anti-bot         | Cloudflare Turnstile + honeypot (silent success)                     |
-| Email            | Resend (forward du message vers l'inbox owner)                       |
-| Tests            | Vitest (unit) + Playwright (e2e smoke)                               |
-| Qualité          | Biome (lint + format), tsc strict, CodeQL weekly                     |
-| CI               | GitHub Actions (lint · typecheck · test · build) + Dependabot groupé |
-| Hébergement      | Vercel (runtime Node pour l'API contact, edge pour l'OG image)       |
-
----
-
-## Setup local
-
-```bash
-# 1. Prérequis : Node 20+, pnpm 10.33+
-pnpm install
-
-# 2. Variables d'environnement
-cp .env.example .env.local
-# → remplir les valeurs (Supabase, Resend, Upstash, Turnstile)
-# → pour dev rapide sans Turnstile : NODE_ENV=development suffit
-#   (le handler relâche la vérification en non-prod)
-
-# 3. Générer un sel IP robuste
-openssl rand -hex 32
-# → le coller dans SECRET_IP_SALT
-
-# 4. Migration Supabase
-supabase db push            # ou copier le SQL de supabase/migrations/ dans l'éditeur
-
-# 5. Lancer le dev server
-pnpm dev                    # http://localhost:3000
-```
-
-### Scripts utiles
-
-```bash
-pnpm lint          # biome check .
-pnpm lint:fix      # biome check --write .
-pnpm typecheck     # tsc --noEmit
-pnpm test          # vitest run (unit)
-pnpm test:e2e      # playwright smoke (build + start automatique)
-pnpm build         # next build
-pnpm start         # next start (prod server)
-```
-
----
-
-## Déploiement (Vercel)
-
-1. **Connecter le repo** à Vercel, ne rien build avant d'avoir ajouté les env vars.
-2. **Copier tout `.env.example`** dans Project Settings → Environment Variables (Production + Preview).
-3. **DNS** : pointer `breaktheloop.site` (Apex) vers Vercel, puis `www` en redirect 301.
-4. **Supabase** : appliquer les migrations (`supabase db push`) sur le projet prod.
-5. **Turnstile** : créer deux widgets (un dev `localhost`, un prod `breaktheloop.site`), coller les site keys + secrets.
-6. **Upstash Redis** : créer une DB REST, coller URL + token.
-7. **Resend** : vérifier le domaine `breaktheloop.site`, créer un sender `hello@breaktheloop.site`.
-
-Le premier déploiement prod buildera le sitemap + robots + OG dynamique. Tester :
-
-```bash
-curl -sI https://breaktheloop.site | grep -E 'content-security-policy|strict-transport-security'
-# → doit renvoyer un CSP avec nonce + HSTS max-age≥15552000
-curl -s https://breaktheloop.site/robots.txt
-curl -s https://breaktheloop.site/sitemap.xml | head -20
-```
-
----
-
-## Checklist sécurité
-
-- [x] **CSP strict** avec nonces per-request, `strict-dynamic`, `frame-ancestors 'none'`.
-- [x] **HSTS** `max-age=15552000; includeSubDomains; preload`.
-- [x] **COOP** `same-origin`, **CORP** `same-origin`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`.
-- [x] **Permissions-Policy** minimaliste (camera, micro, geo, paiement, etc. désactivés).
-- [x] **Zod double-validation** : même schéma côté client (RHF) et serveur (API route).
-- [x] **RLS Postgres forcée**, `REVOKE ALL` de `anon` et `authenticated`, service_role uniquement côté serveur.
-- [x] **CHECK constraints** au niveau DB (longueurs name/email/subject/body, ip_hash = 64 chars).
-- [x] **SHA-256 salé** pour les IPs — jamais stockées en clair. Sel ≥ 32 chars enforced au runtime.
-- [x] **Rate limit** 3/h/IP avec Upstash sliding window, court-circuit AVANT Turnstile (protection budget).
-- [x] **Cloudflare Turnstile** server-side siteverify, fail-closed en prod, fail-open en dev.
-- [x] **Honeypot** silent-success — le bot croit avoir réussi, pas de retry.
-- [x] **Handler pur** avec dependency injection → tests unitaires sans I/O ni réseau.
-- [x] **Generic error payloads** — pas de fingerprinting de l'étape qui a échoué.
-- [x] **`server-only` import** sur les modules qui touchent Supabase service_role, Resend, Upstash, hash IP.
-- [x] **CodeQL** `security-extended` + `security-and-quality`, scan hebdo.
-- [x] **Dependabot** hebdo, updates groupées.
-
-## Accessibilité
-
-- Skip link visible au focus.
-- `prefers-reduced-motion` respecté partout (intro typewriter, animations, Kill Chain).
-- Liste HTML accessible comme surface canonique du Kill Chain (R3F n'est que de la décoration).
-- Labels explicites sur tous les inputs, erreurs en `role="alert"`, `aria-invalid` quand nécessaire.
+| Couche | Choix |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack) · React 19 · TypeScript strict |
+| Style | Tailwind v4 CSS-first · JetBrains Mono + Space Grotesk (self-hosted) |
+| LLM | Google Gemini 2.5 Flash (primary) + Cerebras Llama 3.3 70B (judges) + OpenRouter (fallback) — **tous free tier** |
+| Auth | Supabase Auth — magic link email + Google OAuth |
+| DB | Supabase Postgres + RLS forcée + vue matérialisée leaderboard |
+| Rate limit | Upstash Redis — 10 probes/h/(challenge,IP) + 50 tentatives/jour/user |
+| Validation | Zod côté serveur, scoring HackAPrompt-style (`base × diff × efficiency × persistence`) |
+| Hébergement | VPS IONOS (Ubuntu 24.04) — Nginx + PM2 + certbot |
+| Cron | systemd timers (refresh leaderboard 5min · sync challenges 1×/jour) |
 
 ---
 
@@ -115,37 +29,109 @@ curl -s https://breaktheloop.site/sitemap.xml | head -20
 
 ```
 src/
-  app/                    # Next.js App Router — routes
-    api/contact/          # POST /api/contact — adapter vers le handler pur
-    projects/             # /projects + /projects/[slug]
-    sitemap.ts            # Sitemap dynamique
-    robots.ts             # robots.txt
-    opengraph-image.tsx   # OG image 1200x630 edge-runtime
+  app/
+    page.tsx                    # Landing
+    arena/                      # Liste tutos + page challenge interactive
+    auth/{signin,callback}/     # Magic link + Google OAuth
+    profile/                    # Stats utilisateur
+    leaderboard/                # Top 100
+    api/
+      arena/{probe,submit}/     # POST — interroge / valide
+      cron/                     # refresh-leaderboard + sync-challenges
   components/
-    kill-chain/           # R3F scene + SVG fallback + a11y liste
-    site/                 # Header, Footer, IntroTypewriter, ContactForm, …
-    ui/                   # shadcn base + composants atomiques
+    arena/ChallengeTerminal.tsx # UI terminal avec probe/submit/telemetrie
+    landing/                    # Hero glitch, ConsoleStrip, TypesGrid…
+    site/{Nav,TopBar}.tsx
   lib/
-    contact/              # schema, handler pur, ip-hash, rate-limit, turnstile, email
-    supabase/             # server (service_role) + browser clients + types
-    projects.ts           # Reader Markdown filesystem
-    markdown.ts           # unified/rehype-sanitize pipeline
-  proxy.ts                # Next 16 "proxy" (anciennement middleware) — CSP nonces
-content/projects/         # Projets en Markdown + front-matter YAML
-supabase/migrations/      # SQL source of truth
-tests/
-  e2e/                    # Playwright smoke
-  setup.ts                # bootstrap jest-dom
+    auth/                       # Supabase server + middleware refresh
+    challenges/                 # Schema Zod, validators, scoring, catalog
+    llm/                        # Providers (Gemini/Cerebras/OpenRouter) + router
+    security/                   # ip-hash + rate-limit Upstash
+content/
+  challenges/{tutorial,daily-pool}.ts  # 10 tutos + 5 daily seed
+deploy/
+  nginx/                        # vhost + TLS via certbot
+  systemd/                      # btl-cron@*.{service,timer}
+  scripts/                      # bootstrap.sh + redeploy.sh
+supabase/migrations/            # Schema SQL
 ```
 
 ---
 
-## Crédits tiers
+## Setup local (dev)
 
-- **Hacker Room low poly** par [Pudding_King](https://sketchfab.com/Pudding_King) ([Sketchfab](https://sketchfab.com/3d-models/hacker-room-low-poly-2d86dd3e18a44cc080f85a0e1af9ffe9)) — [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). Fichier adapté : conversion `KHR_materials_pbrSpecularGlossiness` → metal-rough, textures WebP, compression géométrie Draco.
+```bash
+pnpm install
+cp .env.example .env.local
+# → remplir Supabase + LLM keys + Upstash + secrets
+pnpm dev   # http://localhost:3000
+```
 
-## Licence
+Sans Supabase configuré : la landing fonctionne, l'arène redirige vers `/auth/signin` qui crashera. Pour tester l'auth, configure d'abord un projet Supabase.
 
-© Camille Saquet. Le code du site est personnel ; les projets référencés peuvent être sous NDA (marqués `[REDACTED — NDA]` sur leur page).
+Sans LLM keys : la landing + auth fonctionnent ; les routes `/api/arena/*` renvoient `PROVIDER_UNAVAILABLE`.
 
-Contact : **camille@breaktheloop.site**
+---
+
+## Free tier — où récupérer les clés
+
+| Service | URL | Limite gratuite |
+| --- | --- | --- |
+| Supabase | <https://supabase.com> | 50k MAU, 500MB DB, EU region |
+| Gemini | <https://aistudio.google.com/apikey> | 1500 req/jour |
+| Cerebras | <https://cloud.cerebras.ai> | 1M tok/jour, 30 req/min |
+| OpenRouter | <https://openrouter.ai/keys> | 200 req/jour sur modèles `:free` |
+| Upstash Redis | <https://console.upstash.com/redis> | 10k commandes/jour |
+
+Aucune CB exigée chez aucun.
+
+---
+
+## Déploiement VPS (Ubuntu 24.04 — IONOS)
+
+Vois [deploy/DEPLOY.md](deploy/DEPLOY.md) pour la procédure pas-à-pas.
+
+TL;DR :
+
+```bash
+ssh root@<vps-ip>
+git clone https://github.com/<user>/breaktheloop.git /tmp/btl-bootstrap
+bash /tmp/btl-bootstrap/deploy/scripts/bootstrap.sh
+# → édite /var/www/btl/.env.production avec tes clés
+# → re-run: cd /var/www/btl && pnpm install --frozen-lockfile && pnpm build && pm2 reload btl
+```
+
+Updates ultérieures :
+
+```bash
+ssh root@<vps-ip> "bash /var/www/btl/deploy/scripts/redeploy.sh"
+```
+
+---
+
+## Sécurité
+
+- **CSP strict** avec nonces per-request, `strict-dynamic`, `frame-ancestors 'none'`.
+- **HSTS** `max-age=63072000; includeSubDomains; preload`.
+- **COOP/CORP** `same-origin`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, Permissions-Policy minimaliste.
+- **RLS Postgres forcée**, `REVOKE ALL` de `anon`/`authenticated` sur `attempts`, service_role uniquement côté serveur.
+- **CHECK constraints** au niveau DB (longueurs, regex handle, hash 64 chars).
+- **SHA-256 salé** pour les IPs (jamais en clair). Sel ≥ 32 chars enforced runtime.
+- **Rate limit** 10 probes/h/(challenge,IP) + 50 tentatives/jour/user via Upstash.
+- **Validation success TOUJOURS server-side** (le client ne peut pas tricher).
+- **System prompts JAMAIS exposés au client** (route serveur uniquement).
+- **`server-only` import** sur les modules touchant service_role + LLM keys.
+
+---
+
+## Disclaimer légal
+
+Environnement contrôlé. Les techniques apprises ici **ne doivent pas être utilisées sur des systèmes en production sans autorisation écrite** du propriétaire. Aucun contenu utilisateur n'est partagé publiquement sans le handle de l'opérateur. Les payloads sont stockés sous forme de hash SHA-256 ; les IPs sont saltées.
+
+---
+
+## Crédits
+
+- Inspiration : [HackAPrompt](https://www.hackaprompt.com/) (Sander Schulhoff et al.) · [Gandalf](https://gandalf.lakera.ai/) (Lakera).
+- Stack free-tier 2026 : Google AI Studio · Cerebras · OpenRouter · Supabase · Upstash.
+- © Camille Saquet — `camille@breaktheloop.fr`
