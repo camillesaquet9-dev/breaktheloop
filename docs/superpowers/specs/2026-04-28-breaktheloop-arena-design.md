@@ -151,6 +151,14 @@ create table public.challenges (
   active boolean default true
 );
 
+-- Daily challenge state (créé AVANT attempts à cause de la FK)
+create table public.daily_runs (
+  id uuid primary key default gen_random_uuid(),
+  date date not null unique,
+  challenge_slug text references challenges(slug) not null,
+  rotated_at timestamptz default now()
+);
+
 -- Tentatives (1 ligne par submit)
 create table public.attempts (
   id uuid primary key default gen_random_uuid(),
@@ -168,14 +176,6 @@ create table public.attempts (
 );
 create index on attempts(user_id, created_at desc);
 create index on attempts(challenge_slug, success, score desc);
-
--- Daily challenge state
-create table public.daily_runs (
-  id uuid primary key default gen_random_uuid(),
-  date date not null unique,
-  challenge_slug text references challenges(slug) not null,
-  rotated_at timestamptz default now()
-);
 
 -- Vue agrégée leaderboard all-time
 create materialized view public.leaderboard_alltime as
@@ -335,7 +335,7 @@ Judge agents = toujours Cerebras (60K tok/min suffit, parallèle 3 calls).
   1. Pick le challenge le moins joué dans les 30 derniers jours (équilibrage)
   2. Insère un row dans `daily_runs(date=today, slug=...)`
   3. Invalide le cache leaderboard daily
-- Pas de cron Vercel sur VPS → on utilise `node-cron` dans le process Next.js OU systemd timer.
+- Pas de cron Vercel sur VPS → **systemd timer** dédié (`btl-daily-rotate.timer`) qui curl l'endpoint avec `Authorization: Bearer $CRON_SECRET`. Plus robuste qu'un cron in-process (survit aux restarts PM2).
 
 ---
 
