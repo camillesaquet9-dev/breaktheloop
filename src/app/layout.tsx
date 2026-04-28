@@ -1,91 +1,62 @@
 import type { Metadata, Viewport } from "next";
-import { headers } from "next/headers";
-import { IntroTypewriter } from "@/components/site/IntroTypewriter";
-import { SiteFooter } from "@/components/site/SiteFooter";
-import { SiteHeader } from "@/components/site/SiteHeader";
-import { SkipLink } from "@/components/site/SkipLink";
+import { Nav } from "@/components/site/Nav";
+import { TopBar } from "@/components/site/TopBar";
 import { Toaster } from "@/components/ui/sonner";
-import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://breaktheloop.site";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://breaktheloop.fr";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Camille Saquet — cybersécurité · pentest · red team",
-    template: "%s — Camille Saquet",
+    default: "BREAK THE LOOP — Arène Red Team IA",
+    template: "%s · BREAK THE LOOP",
   },
   description:
-    "Portfolio de Camille Saquet. Cybersécurité offensive — pentest, red team, audit. Étudiant BUT R&T cyber à Lannion, admis ESNA Ingénieur Cyberdéfense (alternance 2026).",
-  authors: [{ name: "Camille Saquet", url: siteUrl }],
-  creator: "Camille Saquet",
-  applicationName: "Camille Saquet",
+    "Arène de red teaming IA. Fais sauter les défenses des modèles. Prompt injection, extraction système, défense, exploitation d'agents.",
+  applicationName: "BREAK THE LOOP",
   keywords: [
-    "Camille Saquet",
-    "cybersecurity",
-    "cybersécurité",
-    "red team",
-    "pentest",
-    "audit",
-    "HackAPrompt",
+    "prompt injection",
+    "AI red team",
     "LLM security",
-    "Stormshield",
-    "alternance 2026",
-    "ESNA cyberdéfense",
+    "cybersécurité",
+    "CTF IA",
+    "HackAPrompt",
+    "Gandalf Lakera",
   ],
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     locale: "fr_FR",
     url: siteUrl,
-    siteName: "Camille Saquet",
-    title: "Camille Saquet — cybersécurité · pentest · red team",
-    description:
-      "Portfolio cybersécurité. Red team, pentest, audit. Alternance 3 ans en cyberdéfense — rentrée septembre 2026.",
+    siteName: "BREAK THE LOOP",
+    title: "BREAK THE LOOP — Arène Red Team IA",
+    description: "Probe · Exploit · Comprendre. Une arène de red teaming IA.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Camille Saquet — cybersécurité · pentest · red team",
-    description: "Portfolio cybersécurité. Red team, pentest, audit.",
+    title: "BREAK THE LOOP",
+    description: "Arène de red teaming IA — prompt injection orientée cyber.",
   },
-  icons: {
-    icon: "/favicon.ico",
-  },
+  icons: { icon: "/favicon.ico" },
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#FAFAF7" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0A0A" },
-  ],
-  colorScheme: "light dark",
+  themeColor: "#0a0a0a",
+  colorScheme: "dark",
 };
 
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // The middleware sets `x-nonce` on every request; read it here so we can
-  // emit inline <script nonce="..."> tags compatible with our CSP. When the
-  // middleware is bypassed (e.g. `next start` with matcher mismatch), the
-  // nonce is undefined and the script simply runs without one — which is
-  // fine in production because no CSP is attached to that response either.
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning className="h-full">
-      <head>
-        {/* Runs synchronously before first paint to set [data-theme]. Inline —
-            NOT <Script> — so it executes before hydration and prevents FOUC.
-            The nonce matches the per-request CSP value set in middleware.ts. */}
-        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static trusted string from our own module */}
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
-      <body className="min-h-full flex flex-col font-sans antialiased">
-        <IntroTypewriter />
-        <SkipLink />
-        <SiteHeader />
-        {children}
-        <SiteFooter />
-        <Toaster position="bottom-right" />
+    <html lang="fr" className="h-full">
+      <body className="min-h-full flex flex-col">
+        <a href="#main-content" className="skip-link">
+          Aller au contenu
+        </a>
+        <Nav />
+        <TopBar />
+        <div className="flex-1">{children}</div>
+        <Toaster position="bottom-right" theme="dark" />
       </body>
     </html>
   );

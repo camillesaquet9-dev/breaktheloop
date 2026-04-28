@@ -6,9 +6,4 @@
  */
 
 export { getSupabaseBrowserClient } from "./browser";
-export type {
-  ContactMessageInsert,
-  ContactMessageRow,
-  Database,
-  Json,
-} from "./database.types";
+export type { Database } from "./database.types";

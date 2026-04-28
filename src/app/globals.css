@@ -1,347 +1,210 @@
 /* =============================================================================
- * breaktheloop.site — design system
- * Brutalist editorial. Ivory / black / blood-red accent. Typographic hierarchy.
- * Tailwind v4 CSS-first tokens, self-hosted fonts, dark via [data-theme="dark"].
+ * BREAKTHELOOP — Red Team Arena
+ * Dark terminal aesthetic, scanlines, JetBrains Mono base, Space Grotesk display.
+ * No theme toggle — dark is the brand. Tailwind v4 CSS-first tokens.
  * ============================================================================= */
 
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-
-/* Self-hosted fonts (Fontsource). Latin + latin-ext via unicode-range on each
- * @font-face — browsers only download the subsets the page actually uses. */
-@import "@fontsource-variable/inter/wght.css";
 @import "@fontsource-variable/jetbrains-mono/wght.css";
-@import "@fontsource/instrument-serif/latin.css";
-@import "@fontsource/instrument-serif/latin-ext.css";
-@import "@fontsource/instrument-serif/latin-italic.css";
-@import "@fontsource/instrument-serif/latin-ext-italic.css";
+@import "@fontsource-variable/space-grotesk/wght.css";
 
-/* Dark mode = [data-theme="dark"] attribute on <html>. Toggle user-controlled
- * (layout.tsx runs a pre-hydration script to read localStorage / prefers). */
-@custom-variant dark (&:is([data-theme="dark"] *));
-
-/* ========== Design tokens ==================================================
- * Literal palette + fonts + spacing. Expose to Tailwind via @theme. */
+/* ========== Design tokens (= breaktheloop.html) ============================ */
 @theme {
-  /* Brand palette — rare accent, high contrast, ivory base */
-  --color-bg: #fafaf7;
-  --color-fg: #0a0a0a;
-  --color-accent: #8b1a1a;
-  --color-muted: #6b6b66;
-  --color-border: #e5e5e0;
+  --color-bg: #0a0a0a;
+  --color-bg-1: #0f0f0f;
+  --color-bg-2: #141414;
+  --color-line: #1f1f1f;
+  --color-line-2: #2a2a2a;
+  --color-fg: #e8e6e1;
+  --color-fg-dim: #7a7872;
+  --color-fg-mute: #4a4944;
+  --color-signal: oklch(0.72 0.18 25);
+  --color-signal-2: oklch(0.62 0.20 25);
+  --color-safe: oklch(0.72 0.10 140);
+  --color-warn: oklch(0.82 0.14 90);
 
-  /* Fonts */
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-sans: "Inter Variable", system-ui, -apple-system, sans-serif;
-
-  /* Spacing — 24px gutter for the 12-col grid */
-  --spacing-gutter: 1.5rem;
-
-  /* Radius — brutalist: near-flat */
-  --radius-none: 0;
-  --radius-sm: 2px;
-  --radius-md: 4px;
+  --font-display: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Space Grotesk Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* ========== shadcn semantic tokens ========================================
- * Mapped to brand palette. Keeping the full shadcn token surface so any
- * shadcn/ui component we drop in later just works. */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-
-  --radius-xs: 0px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
-}
-
-/* ========== Light (default) ============================================== */
 :root {
-  color-scheme: light;
-
-  --background: #fafaf7;
-  --foreground: #0a0a0a;
-
-  --primary: #0a0a0a;
-  --primary-foreground: #fafaf7;
-
-  --secondary: #f1f1ec;
-  --secondary-foreground: #0a0a0a;
-
-  --muted: #f1f1ec;
-  --muted-foreground: #6b6b66;
-
-  --accent: #8b1a1a;
-  --accent-foreground: #fafaf7;
-
-  --destructive: #8b1a1a;
-  --destructive-foreground: #fafaf7;
-
-  --border: #e5e5e0;
-  --input: #e5e5e0;
-  --ring: #0a0a0a;
-
-  --popover: #fafaf7;
-  --popover-foreground: #0a0a0a;
-
-  --card: #fafaf7;
-  --card-foreground: #0a0a0a;
-
-  --radius: 2px;
-}
-
-/* ========== Dark (data-theme="dark") ===================================== */
-[data-theme="dark"] {
   color-scheme: dark;
-
-  --background: #0a0a0a;
-  --foreground: #fafaf7;
-
-  --primary: #fafaf7;
-  --primary-foreground: #0a0a0a;
-
-  --secondary: #1a1a17;
-  --secondary-foreground: #fafaf7;
-
-  --muted: #1a1a17;
-  --muted-foreground: #9b9b96;
-
-  --accent: #b83030;
-  --accent-foreground: #fafaf7;
-
-  --destructive: #b83030;
-  --destructive-foreground: #fafaf7;
-
-  --border: #2a2a27;
-  --input: #2a2a27;
-  --ring: #fafaf7;
-
-  --popover: #111110;
-  --popover-foreground: #fafaf7;
-
-  --card: #111110;
-  --card-foreground: #fafaf7;
+  --bg: #0a0a0a;
+  --bg-1: #0f0f0f;
+  --bg-2: #141414;
+  --line: #1f1f1f;
+  --line-2: #2a2a2a;
+  --fg: #e8e6e1;
+  --fg-dim: #7a7872;
+  --fg-mute: #4a4944;
+  --signal: oklch(0.72 0.18 25);
+  --signal-2: oklch(0.62 0.20 25);
+  --safe: oklch(0.72 0.10 140);
+  --warn: oklch(0.82 0.14 90);
 }
 
-/* ========== Base layer =================================================== */
-@layer base {
-  * {
-    border-color: var(--border);
-  }
-
-  html {
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "cv11", "ss01", "ss03";
-    transition:
-      background-color 200ms ease,
-      color 200ms ease;
-  }
-
-  body {
-    background: var(--background);
-    color: var(--foreground);
-  }
-
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
-  }
-
-  /* Typographic scale — purely semantic, no utility class needed */
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
-  }
-
-  code,
-  kbd,
-  samp,
-  pre {
-    font-family: var(--font-mono);
-  }
-
-  /* Selection */
-  ::selection {
-    background: var(--foreground);
-    color: var(--background);
-  }
-}
-
-/* ========== Utility helpers ============================================== */
-.font-display {
-  font-family: var(--font-display);
-}
-.font-mono {
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-mono);
-}
-.font-sans {
-  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-/* Skip-to-content link — visually hidden until focused */
+/* Scanlines overlay (the design's signature texture) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.012) 0 1px,
+    transparent 1px 3px
+  );
+  mix-blend-mode: overlay;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1001;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--signal);
+  color: #0a0a0a;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* ========== Animations ===================================================== */
+@keyframes blink {
+  50% { opacity: 0.2; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes glitch1 {
+  0%, 93%, 100% { opacity: 0; transform: translate(0, 0); }
+  94% { opacity: 0.8; transform: translate(-3px, 1px); }
+  96% { opacity: 0.6; transform: translate(2px, -1px); }
+}
+@keyframes glitch2 {
+  0%, 93%, 100% { opacity: 0; transform: translate(0, 0); }
+  94% { opacity: 0.7; transform: translate(3px, -1px); }
+  96% { opacity: 0.5; transform: translate(-2px, 1px); }
+}
+
+.animate-blink {
+  animation: blink 1.4s steps(2) infinite;
+}
+.animate-pulse-dot {
+  animation: pulse 2s infinite;
+}
+.animate-scroll {
+  animation: scroll 60s linear infinite;
+}
+
+/* Hero glitch text */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.glitch::before {
+  color: var(--signal);
+  transform: translate(-2px, 0);
+  clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: glitch1 6s infinite;
+}
+.glitch::after {
+  color: #3da9c4;
+  transform: translate(2px, 0);
+  clip-path: polygon(0 67%, 100% 67%, 100% 100%, 0 100%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: glitch2 6s infinite;
+}
+
+/* Hero grid background */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+/* Skip link */
 .skip-link {
   position: absolute;
   left: -9999px;
   top: 0;
   padding: 0.5rem 1rem;
-  background: var(--foreground);
-  color: var(--background);
+  background: var(--fg);
+  color: var(--bg);
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  z-index: 100;
+  z-index: 10000;
 }
 .skip-link:focus {
   left: 0;
 }
 
-/* ========== Project detail prose =========================================
- * Styles the HTML produced by the Markdown pipeline on project detail pages.
- * Scoped via `.project-prose` so we never leak these styles globally. */
-.project-prose {
-  color: var(--foreground);
-  max-width: 65ch;
-}
-.project-prose h2 {
-  font-family: var(--font-display);
-  font-size: 1.875rem;
-  line-height: 1.15;
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-  letter-spacing: -0.01em;
-}
-.project-prose h3 {
-  font-family: var(--font-display);
-  font-size: 1.375rem;
-  line-height: 1.2;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-}
-.project-prose p {
-  font-size: 1rem;
-  line-height: 1.7;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-.project-prose ul,
-.project-prose ol {
-  padding-left: 1.25rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  line-height: 1.7;
-}
-.project-prose ul {
-  list-style-type: square;
-}
-.project-prose ol {
-  list-style-type: decimal;
-}
-.project-prose li {
-  margin-top: 0.25rem;
-}
-.project-prose code {
-  font-family: var(--font-mono);
-  font-size: 0.875em;
-  background: var(--muted);
-  padding: 0.1em 0.35em;
-  border-radius: 2px;
-}
-.project-prose pre {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  line-height: 1.55;
-  background: var(--muted);
-  padding: 1rem;
-  margin: 1.5rem 0;
-  overflow-x: auto;
-  border: 1px solid var(--border);
-}
-.project-prose pre code {
-  background: transparent;
-  padding: 0;
-  font-size: inherit;
-}
-.project-prose a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.project-prose a:hover {
-  text-decoration-thickness: 2px;
-}
-.project-prose blockquote {
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-  margin: 1.5rem 0;
-  color: var(--muted-foreground);
-  font-style: italic;
-}
-.project-prose strong {
-  font-weight: 600;
-  color: var(--foreground);
-}
-.project-prose hr {
-  border: 0;
-  border-top: 1px solid var(--border);
-  margin: 2.5rem 0;
-}
-
-/* Caret blink — used by the intro typewriter */
-@keyframes blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
-  }
-}
-.animate-blink {
-  animation: blink 1s steps(1) infinite;
-}
-
-/* ========== Reduced motion ===============================================
- * !important is intentional — we need to override third-party library motion
- * (Framer, GSAP, Three.js) regardless of specificity. */
+/* ========== Reduced motion =================================================*/
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     animation-duration: 0.01ms !important;
-    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     animation-iteration-count: 1 !important;
-    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
+    /* biome-ignore lint/complexity/noImportantStyles: a11y override */
     transition-duration: 0.01ms !important;
-    /* biome-ignore lint/complexity/noImportantStyles: override third-party motion */
-    scroll-behavior: auto !important;
   }
 }
