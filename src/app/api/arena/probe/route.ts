@@ -2,6 +2,7 @@ import "server-only";
 
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { isGuestMode } from "@/lib/auth/guest-mode";
 import { getSessionUser } from "@/lib/auth/supabase-server";
 import { getChallenge } from "@/lib/challenges/catalog";
 import { callTarget } from "@/lib/llm/router";
@@ -17,8 +18,9 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const guest = isGuestMode();
   const user = await getSessionUser();
-  if (!user) {
+  if (!user && !guest) {
     return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
   }
 
@@ -46,16 +48,23 @@ export async function POST(request: NextRequest) {
     const r = await probeLimiter.limit(`${parsed.data.slug}:${ip}`);
     if (!r.success) {
       return NextResponse.json(
-        { error: "RATE_LIMITED", retryAfterSeconds: Math.max(1, Math.ceil(r.reset / 1000) - Math.floor(Date.now() / 1000)) },
+        {
+          error: "RATE_LIMITED",
+          retryAfterSeconds: Math.max(
+            1,
+            Math.ceil(r.reset / 1000) - Math.floor(Date.now() / 1000),
+          ),
+        },
         { status: 429 },
       );
     }
   }
 
-  // Per-user daily cap.
+  // Per-user daily cap (or per-IP daily cap in guest mode).
   const userLimiter = getDailyUserLimiter();
   if (userLimiter) {
-    const r = await userLimiter.limit(user.id);
+    const limiterKey = user?.id ?? `guest:${ip}`;
+    const r = await userLimiter.limit(limiterKey);
     if (!r.success) {
       return NextResponse.json({ error: "DAILY_QUOTA_REACHED" }, { status: 429 });
     }
@@ -78,8 +87,8 @@ export async function POST(request: NextRequest) {
       outputTokens: result.outputTokens,
       provider: result.provider,
       latencyMs: result.latencyMs,
-      // Hash hash so the submit route can correlate without trusting the client.
       ipHash: hashIp(ip),
+      guest,
     });
   } catch (err) {
     console.error("[arena/probe]", err);

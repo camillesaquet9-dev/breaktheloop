@@ -1,14 +1,16 @@
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth/supabase-server";
+import { isGuestMode } from "@/lib/auth/guest-mode";
+import { createSupabaseServerClient, getSessionUser } from "@/lib/auth/supabase-server";
 import { getTutorialChallenges } from "@/lib/challenges/catalog";
 import { challengeDef } from "@/lib/challenges/schema";
-import { createSupabaseServerClient } from "@/lib/auth/supabase-server";
 
 export const metadata = { title: "Arène · Tutoriel" };
+export const dynamic = "force-dynamic";
 
 export default async function ArenaPage() {
   const challenges = getTutorialChallenges().map((c) => challengeDef.parse(c));
-  const user = await getSessionUser();
+  const guest = isGuestMode();
+  const user = guest ? null : await getSessionUser();
 
   // Solved-status per challenge for the connected user.
   let solved = new Set<string>();
@@ -61,26 +63,39 @@ export default async function ArenaPage() {
         </div>
       </div>
 
-      {!user && (
+      {guest ? (
         <div
-          className="mb-10 p-5 flex items-center justify-between gap-4 flex-wrap"
-          style={{ border: "1px solid var(--signal)", background: "rgba(255,80,40,0.04)" }}
+          className="mb-10 p-5 flex items-center gap-4 flex-wrap"
+          style={{ border: "1px solid var(--warn)", background: "rgba(212,175,55,0.06)" }}
         >
           <p className="text-sm" style={{ color: "var(--fg)" }}>
-            Connecte-toi pour suivre ta progression et apparaître dans le classement.
+            <b style={{ color: "var(--warn)", letterSpacing: "0.08em" }}>// MODE INVITÉ</b> · Auth
+            désactivée temporairement. Tu peux tester tous les challenges, mais{" "}
+            <span style={{ color: "var(--warn)" }}>les scores ne sont pas sauvegardés</span>.
           </p>
-          <Link
-            href={`/auth/signin?next=${encodeURIComponent("/arena")}`}
-            className="px-3 py-2 text-xs uppercase font-medium border"
-            style={{
-              borderColor: "var(--signal)",
-              color: "var(--fg)",
-              letterSpacing: "0.08em",
-            }}
-          >
-            &gt;_ ENTRER
-          </Link>
         </div>
+      ) : (
+        !user && (
+          <div
+            className="mb-10 p-5 flex items-center justify-between gap-4 flex-wrap"
+            style={{ border: "1px solid var(--signal)", background: "rgba(255,80,40,0.04)" }}
+          >
+            <p className="text-sm" style={{ color: "var(--fg)" }}>
+              Connecte-toi pour suivre ta progression et apparaître dans le classement.
+            </p>
+            <Link
+              href={`/auth/signin?next=${encodeURIComponent("/arena")}`}
+              className="px-3 py-2 text-xs uppercase font-medium border"
+              style={{
+                borderColor: "var(--signal)",
+                color: "var(--fg)",
+                letterSpacing: "0.08em",
+              }}
+            >
+              &gt;_ ENTRER
+            </Link>
+          </div>
+        )
       )}
 
       <div

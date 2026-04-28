@@ -2,6 +2,7 @@ import "server-only";
 
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { isGuestMode } from "@/lib/auth/guest-mode";
 import { getSessionUser } from "@/lib/auth/supabase-server";
 import { getChallenge } from "@/lib/challenges/catalog";
 import { computeScore } from "@/lib/challenges/scoring";
@@ -21,8 +22,11 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  const guest = isGuestMode();
   const user = await getSessionUser();
-  if (!user) return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
+  if (!user && !guest) {
+    return NextResponse.json({ error: "AUTH_REQUIRED" }, { status: 401 });
+  }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "BAD_REQUEST" }, { status: 400 });
@@ -49,37 +53,41 @@ export async function POST(request: NextRequest) {
     submittedFlag: parsed.data.submittedFlag,
   });
 
-  // Compute attempt N for this user/challenge for scoring + persistence_penalty.
-  const supabase = createSupabaseServiceClient();
-  const { count } = await supabase
-    .from("attempts")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .eq("challenge_slug", challenge.slug);
-  const attemptN = (count ?? 0) + 1;
+  // Persistence path (only when authenticated).
+  let attemptN = 1;
+  let score = 0;
 
-  const score = validation.success
-    ? computeScore({
-        challenge,
-        inputTokens: llm.inputTokens,
-        attemptN,
-      })
-    : 0;
+  if (user) {
+    const supabase = createSupabaseServiceClient();
+    const { count } = await supabase
+      .from("attempts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("challenge_slug", challenge.slug);
+    attemptN = (count ?? 0) + 1;
 
-  const ip = readClientIp(request.headers);
-  const insertData = {
-    user_id: user.id,
-    challenge_slug: challenge.slug,
-    payload_hash: hashPayload(parsed.data.payload),
-    input_tokens: llm.inputTokens,
-    output_excerpt: llm.text.slice(0, 220),
-    judges_votes: validation.judgesVotes ?? null,
-    success: validation.success,
-    score,
-    ip_hash: hashIp(ip),
-  };
-  // biome-ignore lint/suspicious/noExplicitAny: supabase v2 generic typing hassle, schema enforced server-side
-  await (supabase.from("attempts") as any).insert(insertData);
+    score = validation.success
+      ? computeScore({ challenge, inputTokens: llm.inputTokens, attemptN })
+      : 0;
+
+    const ip = readClientIp(request.headers);
+    const insertData = {
+      user_id: user.id,
+      challenge_slug: challenge.slug,
+      payload_hash: hashPayload(parsed.data.payload),
+      input_tokens: llm.inputTokens,
+      output_excerpt: llm.text.slice(0, 220),
+      judges_votes: validation.judgesVotes ?? null,
+      success: validation.success,
+      score,
+      ip_hash: hashIp(ip),
+    };
+    // biome-ignore lint/suspicious/noExplicitAny: supabase v2 generic typing hassle, schema enforced server-side
+    await (supabase.from("attempts") as any).insert(insertData);
+  } else if (guest && validation.success) {
+    // Guest mode: still surface a "score that would have been" for fun.
+    score = computeScore({ challenge, inputTokens: llm.inputTokens, attemptN: 1 });
+  }
 
   return NextResponse.json({
     success: validation.success,
@@ -92,5 +100,6 @@ export async function POST(request: NextRequest) {
     latencyMs: llm.latencyMs,
     judgesVotes: validation.judgesVotes ?? null,
     attemptN,
+    guest,
   });
 }
